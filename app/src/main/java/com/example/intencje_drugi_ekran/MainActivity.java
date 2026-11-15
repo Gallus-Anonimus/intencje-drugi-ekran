@@ -119,12 +119,12 @@ public class MainActivity extends AppCompatActivity {
         }
         Question question = (Question) tvQuestion.getTag();
         String selectedAnswer = ((RadioButton) findViewById(checkedId)).getText().toString();
-        boolean isCorrect = selectedAnswer.equals(question.correctAnswer);
+        boolean isCorrect = question.isCorrect(selectedAnswer, checkedId);
 
         Intent intent = new Intent(this, ResultActivity.class);
         intent.putExtra(ResultActivity.EXTRA_QUESTION, question.text);
         intent.putExtra(ResultActivity.EXTRA_SELECTED_ANSWER, selectedAnswer);
-        intent.putExtra(ResultActivity.EXTRA_CORRECT_ANSWER, question.correctAnswer);
+        intent.putExtra(ResultActivity.EXTRA_CORRECT_ANSWER, question.getCorrectAnswerText());
         intent.putExtra(ResultActivity.EXTRA_POINTS, isCorrect ? 1 : 0);
         intent.putExtra(ResultActivity.EXTRA_IS_CORRECT, isCorrect);
         resultLauncher.launch(intent);
@@ -145,6 +145,31 @@ public class MainActivity extends AppCompatActivity {
             this.answerC = answerC;
             this.answerD = answerD;
             this.correctAnswer = correctAnswer;
+        }
+
+        private boolean isCorrect(String selectedAnswer, int checkedId) {
+            String answerLetter;
+            if (checkedId == R.id.rbAnswerA) {
+                answerLetter = "a";
+            } else if (checkedId == R.id.rbAnswerB) {
+                answerLetter = "b";
+            } else if (checkedId == R.id.rbAnswerC) {
+                answerLetter = "c";
+            } else {
+                answerLetter = "d";
+            }
+            return correctAnswer.trim().equalsIgnoreCase(answerLetter)
+                    || correctAnswer.trim().equalsIgnoreCase(selectedAnswer.trim());
+        }
+
+        private String getCorrectAnswerText() {
+            switch (correctAnswer.trim().toLowerCase()) {
+                case "a": return answerA;
+                case "b": return answerB;
+                case "c": return answerC;
+                case "d": return answerD;
+                default: return correctAnswer;
+            }
         }
 
     }
