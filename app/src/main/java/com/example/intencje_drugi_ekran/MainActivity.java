@@ -28,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null
                         && result.getData().getBooleanExtra(ResultActivity.EXTRA_PLAY_AGAIN, false)) {
                     showRandomQuestion();
+                } else if (result.getResultCode() == RESULT_CANCELED) {
+                    Snackbar.make(findViewById(R.id.main), R.string.quiz_cancelled,
+                            Snackbar.LENGTH_SHORT).show();
                 }
             });
 
