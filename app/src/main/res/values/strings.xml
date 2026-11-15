@@ -1,27 +1,17 @@
 <resources>
-    <string name="app_name">Zapisy na kurs</string>
-    <string name="header_form">Zapisy na kurs</string>
-    <string name="header_summary">Sprawdź dane</string>
-    <string name="hint_name">Imię i nazwisko</string>
-    <string name="hint_email">Adres e-mail</string>
-    <string name="label_course">Kurs</string>
-    <string name="label_level">Poziom zaawansowania</string>
-    <string name="newsletter">Chcę dostawać newsletter</string>
-    <string name="btn_next">DALEJ</string>
-    <string name="btn_confirm">POTWIERDŹ</string>
-    <string name="btn_edit">POPRAW DANE</string>
-    <string name="btn_share">UDOSTĘPNIJ</string>
-    <string name="summary_format">Imię: %1$s\nE-mail: %2$s\nKurs: %3$s\nPoziom: %4$d/10\nNewsletter: %5$s</string>
-    <string name="yes_short">tak</string>
-    <string name="no_short">nie</string>
-    <string name="registered">Zapisano, numer zgłoszenia %1$s</string>
+    <string name="app_name">Quiz</string>
+    <string name="title_quiz">Losowy quiz</string>
+    <string name="title_result">Wynik</string>
+    <string name="question_number">Pytanie nr %1$d</string>
+    <string name="btn_check">SPRAWDŹ ODPOWIEDŹ</string>
+    <string name="btn_play_again">ZAGRAJ PONOWNIE</string>
+    <string name="btn_share">UDOSTĘPNIJ WYNIK</string>
+    <string name="error_no_answer">Wybierz odpowiedź przed przejściem dalej</string>
+    <string name="error_questions">Nie udało się wczytać pytań</string>
+    <string name="quiz_cancelled">Quiz został zakończony</string>
+    <string name="answer_correct">Dobra odpowiedź! Zdobywasz %1$d punkt.</string>
+    <string name="answer_wrong">Niestety, tym razem 0 punktów.</string>
+    <string name="correct_answer">Poprawna odpowiedź: %1$s</string>
     <string name="share_via">Udostępnij przez</string>
     <string name="error_no_app">Brak aplikacji do obsługi tej czynności</string>
-    <string name="error_name">Podaj imię i nazwisko</string>
-    <string name="error_email">Podaj adres e-mail</string>
-    <string-array name="courses">
-        <item>Programowanie w Javie</item>
-        <item>Aplikacje mobilne</item>
-        <item>Bazy danych</item>
-    </string-array>
 </resources>

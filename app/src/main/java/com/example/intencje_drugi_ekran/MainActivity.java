@@ -2,11 +2,9 @@ package com.example.intencje_drugi_ekran;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.Spinner;
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -15,54 +13,139 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class MainActivity extends AppCompatActivity {
-    private final ActivityResultLauncher<Intent> summaryLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    String number = result.getData().getStringExtra(SummaryActivity.EXTRA_NUMBER);
-                    Snackbar.make(findViewById(R.id.main), getString(R.string.registered, number),
-                            Snackbar.LENGTH_LONG).show();
+                if (result.getResultCode() == RESULT_OK && result.getData() != null
+                        && result.getData().getBooleanExtra(ResultActivity.EXTRA_PLAY_AGAIN, false)) {
+                    showRandomQuestion();
                 }
             });
-    private EditText etName;
-    private EditText etEmail;
-    private Spinner spCourse;
-    private SeekBar sbLevel;
-    private CheckBox cbNewsletter;
-    private TextView tvLevelValue;
+
+    private final ArrayList<Question> questions = new ArrayList<>();
+    private final ArrayList<Integer> questionOrder = new ArrayList<>();
+    private TextView tvQuestionNumber;
+    private TextView tvQuestion;
+    private RadioGroup rgAnswers;
+    private RadioButton rbAnswerA;
+    private RadioButton rbAnswerB;
+    private RadioButton rbAnswerC;
+    private RadioButton rbAnswerD;
+    private int questionPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        etName = findViewById(R.id.etName);
-        etEmail = findViewById(R.id.etEmail);
-        spCourse = findViewById(R.id.spCourse);
-        sbLevel = findViewById(R.id.sbLevel);
-        cbNewsletter = findViewById(R.id.cbNewsletter);
-        tvLevelValue = findViewById(R.id.tvLevelValue);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.courses, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spCourse.setAdapter(adapter);
-        tvLevelValue.setText(String.valueOf(sbLevel.getProgress()));
-        sbLevel.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvLevelValue.setText(String.valueOf(progress));
-            }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
-            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
-        });
-        findViewById(R.id.btnNext).setOnClickListener(view -> openSummary());
+        tvQuestionNumber = findViewById(R.id.tvQuestionNumber);
+        tvQuestion = findViewById(R.id.tvQuestion);
+        rgAnswers = findViewById(R.id.rgAnswers);
+        rbAnswerA = findViewById(R.id.rbAnswerA);
+        rbAnswerB = findViewById(R.id.rbAnswerB);
+        rbAnswerC = findViewById(R.id.rbAnswerC);
+        rbAnswerD = findViewById(R.id.rbAnswerD);
+
+        if (loadQuestions()) {
+            showRandomQuestion();
+        } else {
+            findViewById(R.id.btnCheck).setEnabled(false);
+            Snackbar.make(findViewById(R.id.main), R.string.error_questions, Snackbar.LENGTH_INDEFINITE).show();
+        }
+        findViewById(R.id.btnCheck).setOnClickListener(view -> checkAnswer());
     }
 
-    private void openSummary() {
-        Intent intent = new Intent(this, SummaryActivity.class);
-        intent.putExtra(SummaryActivity.EXTRA_NAME, etName.getText().toString().trim());
-        intent.putExtra(SummaryActivity.EXTRA_EMAIL, etEmail.getText().toString().trim());
-        intent.putExtra(SummaryActivity.EXTRA_COURSE, spCourse.getSelectedItem().toString());
-        intent.putExtra(SummaryActivity.EXTRA_LEVEL, sbLevel.getProgress());
-        intent.putExtra(SummaryActivity.EXTRA_NEWSLETTER, cbNewsletter.isChecked());
-        summaryLauncher.launch(intent);
+    private boolean loadQuestions() {
+        try (InputStream stream = getResources().openRawResource(R.raw.questions)) {
+            String json = readJson(stream);
+            JSONArray array = new JSONArray(json);
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject item = array.getJSONObject(i);
+                questions.add(new Question(item.getString("q"), item.getString("a"), item.getString("b"),
+                        item.getString("c"), item.getString("d"), item.getString("correct_answer")));
+                questionOrder.add(i);
+            }
+            Collections.shuffle(questionOrder);
+            return !questions.isEmpty();
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private String readJson(InputStream stream) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = stream.read(buffer)) != -1) {
+            output.write(buffer, 0, read);
+        }
+        return new String(output.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    private void showRandomQuestion() {
+        if (questionPosition == questionOrder.size()) {
+            Collections.shuffle(questionOrder);
+            questionPosition = 0;
+        }
+        Question question = questions.get(questionOrder.get(questionPosition++));
+        tvQuestionNumber.setText(getString(R.string.question_number, questionPosition));
+        tvQuestion.setText(question.text);
+        setAnswer(rbAnswerA, question.answerA);
+        setAnswer(rbAnswerB, question.answerB);
+        setAnswer(rbAnswerC, question.answerC);
+        setAnswer(rbAnswerD, question.answerD);
+        rgAnswers.clearCheck();
+        tvQuestion.setTag(question);
+    }
+
+    private void setAnswer(RadioButton answerView, String answer) {
+        answerView.setText(answer);
+        answerView.setVisibility(answer.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void checkAnswer() {
+        int checkedId = rgAnswers.getCheckedRadioButtonId();
+        if (checkedId == -1) {
+            Snackbar.make(findViewById(R.id.main), R.string.error_no_answer, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        Question question = (Question) tvQuestion.getTag();
+        String selectedAnswer = ((RadioButton) findViewById(checkedId)).getText().toString();
+        boolean isCorrect = selectedAnswer.equals(question.correctAnswer);
+
+        Intent intent = new Intent(this, ResultActivity.class);
+        intent.putExtra(ResultActivity.EXTRA_QUESTION, question.text);
+        intent.putExtra(ResultActivity.EXTRA_SELECTED_ANSWER, selectedAnswer);
+        intent.putExtra(ResultActivity.EXTRA_CORRECT_ANSWER, question.correctAnswer);
+        intent.putExtra(ResultActivity.EXTRA_POINTS, isCorrect ? 1 : 0);
+        intent.putExtra(ResultActivity.EXTRA_IS_CORRECT, isCorrect);
+        resultLauncher.launch(intent);
+    }
+
+    private static class Question {
+        private final String text;
+        private final String answerA;
+        private final String answerB;
+        private final String answerC;
+        private final String answerD;
+        private final String correctAnswer;
+
+        private Question(String text, String answerA, String answerB, String answerC, String answerD, String correctAnswer) {
+            this.text = text;
+            this.answerA = answerA;
+            this.answerB = answerB;
+            this.answerC = answerC;
+            this.answerD = answerD;
+            this.correctAnswer = correctAnswer;
+        }
+
     }
 }
