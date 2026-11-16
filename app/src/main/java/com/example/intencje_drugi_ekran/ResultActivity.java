@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ResultActivity extends AppCompatActivity {
@@ -15,6 +15,8 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_POINTS = "com.example.intencje_drugi_ekran.POINTS";
     public static final String EXTRA_IS_CORRECT = "com.example.intencje_drugi_ekran.IS_CORRECT";
     public static final String EXTRA_PLAY_AGAIN = "com.example.intencje_drugi_ekran.PLAY_AGAIN";
+
+    private static final String TAG = "ResultActivity";
 
     private String resultText;
 
@@ -33,8 +35,22 @@ public class ResultActivity extends AppCompatActivity {
                 getString(R.string.correct_answer, correctAnswer));
         findViewById(R.id.btnPlayAgain).setOnClickListener(view -> playAgain());
         findViewById(R.id.btnShare).setOnClickListener(view -> share());
+
+        Log.d(TAG, "onCreate");
     }
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+    }
     private void playAgain() {
         Intent result = new Intent();
         result.putExtra(EXTRA_PLAY_AGAIN, true);

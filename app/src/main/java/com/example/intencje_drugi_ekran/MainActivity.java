@@ -1,7 +1,9 @@
+
 package com.example.intencje_drugi_ekran;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
+
     private final ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null
@@ -49,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(TAG, "onCreate");
+
         tvQuestionNumber = findViewById(R.id.tvQuestionNumber);
         tvQuestion = findViewById(R.id.tvQuestion);
         rgAnswers = findViewById(R.id.rgAnswers);
@@ -61,9 +69,28 @@ public class MainActivity extends AppCompatActivity {
             showRandomQuestion();
         } else {
             findViewById(R.id.btnCheck).setEnabled(false);
-            Snackbar.make(findViewById(R.id.main), R.string.error_questions, Snackbar.LENGTH_INDEFINITE).show();
+            Snackbar.make(findViewById(R.id.main), R.string.error_questions,
+                    Snackbar.LENGTH_INDEFINITE).show();
         }
+
         findViewById(R.id.btnCheck).setOnClickListener(view -> checkAnswer());
+
+        findViewById(R.id.btnAbout).setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
     }
 
     private boolean loadQuestions() {
@@ -72,8 +99,9 @@ public class MainActivity extends AppCompatActivity {
             JSONArray array = new JSONArray(json);
             for (int i = 0; i < array.length(); i++) {
                 JSONObject item = array.getJSONObject(i);
-                questions.add(new Question(item.getString("q"), item.getString("a"), item.getString("b"),
-                        item.getString("c"), item.getString("d"), item.getString("correct_answer")));
+                questions.add(new Question(item.getString("q"), item.getString("a"),
+                        item.getString("b"), item.getString("c"), item.getString("d"),
+                        item.getString("correct_answer")));
                 questionOrder.add(i);
             }
             Collections.shuffle(questionOrder);
@@ -117,11 +145,13 @@ public class MainActivity extends AppCompatActivity {
     private void checkAnswer() {
         int checkedId = rgAnswers.getCheckedRadioButtonId();
         if (checkedId == -1) {
-            Snackbar.make(findViewById(R.id.main), R.string.error_no_answer, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(R.id.main), R.string.error_no_answer,
+                    Snackbar.LENGTH_SHORT).show();
             return;
         }
         Question question = (Question) tvQuestion.getTag();
-        String selectedAnswer = ((RadioButton) findViewById(checkedId)).getText().toString();
+        String selectedAnswer = ((RadioButton) findViewById(checkedId))
+                .getText().toString();
         boolean isCorrect = question.isCorrect(selectedAnswer, checkedId);
 
         Intent intent = new Intent(this, ResultActivity.class);
@@ -141,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
         private final String answerD;
         private final String correctAnswer;
 
-        private Question(String text, String answerA, String answerB, String answerC, String answerD, String correctAnswer) {
+        private Question(String text, String answerA, String answerB,
+                         String answerC, String answerD, String correctAnswer) {
             this.text = text;
             this.answerA = answerA;
             this.answerB = answerB;
@@ -174,6 +205,5 @@ public class MainActivity extends AppCompatActivity {
                 default: return correctAnswer;
             }
         }
-
     }
 }
