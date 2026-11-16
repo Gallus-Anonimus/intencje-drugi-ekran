@@ -1,63 +1,52 @@
-# Aplikacja Android - dwa ekrany
+# Quiz
 
-## Opis
+Prosta aplikacja Android z losowymi pytaniami jednokrotnego wyboru. Po wybraniu odpowiedzi użytkownik od razu widzi wynik oraz poprawną odpowiedź, a następnie może rozpocząć kolejne pytanie lub udostępnić rezultat.
 
-Projekt przedstawia prostą aplikację do zapisywania się na kurs. Użytkownik wypełnia formularz na pierwszym ekranie, a następnie przechodzi do podsumowania, gdzie może sprawdzić podane informacje i potwierdzić zgłoszenie.
+## Co robi aplikacja
 
-Dane pomiędzy ekranami są przekazywane za pomocą `Intent` i `putExtra()`.
+- Wczytuje bank pytań z pliku JSON.
+- Losuje pytania tak, aby nie powtarzały się przed przejściem całej puli.
+- Pozwala wybrać jedną z czterech odpowiedzi.
+- Informuje o poprawnej lub błędnej odpowiedzi i przyznaje 1 punkt za poprawną odpowiedź.
+- Wyświetla poprawną odpowiedź po każdym pytaniu.
+- Umożliwia rozpoczęcie następnej rundy oraz udostępnienie wyniku przez inne aplikacje Androida.
 
-## Funkcje aplikacji
+## Ekrany
 
-- Wypełnianie formularza zapisu na kurs.
-- Wybór kursu z listy.
-- Ustawienie poziomu zaawansowania za pomocą `SeekBar`.
-- Zaznaczenie zgody na newsletter.
-- Przekazanie danych na drugi ekran.
-- Wyświetlenie podsumowania.
-- Potwierdzenie zgłoszenia i otrzymanie numeru.
-- Powrót do formularza bez potwierdzania.
-- Udostępnienie podsumowania przez inną aplikację.
+### Quiz
 
-## Zrzuty ekranu
+![Ekran pytania](screenshots/pytanie.png)
 
-### Ekran formularza
+Na ekranie głównym wyświetlane są numer pytania, jego treść i dostępne odpowiedzi. Po użyciu przycisku **SPRAWDŹ ODPOWIEDŹ** aplikacja sprawdza zaznaczoną opcję; brak wyboru powoduje wyświetlenie krótkiego komunikatu.
 
-![Ekran formularza](screenshots/main.png)
+### Wynik
 
-Na pierwszym ekranie użytkownik podaje swoje dane, wybiera kurs i określa poziom zaawansowania. Po kliknięciu przycisku "DALEJ" aplikacja otwiera ekran podsumowania.
+![Ekran wyniku](screenshots/odpowiedz.png)
 
-### Ekran podsumowania
+Drugi ekran pokazuje rezultat i właściwą odpowiedź. Z tego miejsca można udostępnić wynik albo wrócić do losowania następnego pytania.
 
-![Ekran podsumowania](screenshots/summary.png)
+## Pytania
 
-Drugi ekran wyświetla dane z formularza. Można tutaj wrócić do edycji, potwierdzić zgłoszenie lub udostępnić podsumowanie.
+Pytania znajdują się w pliku [`app/src/main/res/raw/questions.json`](app/src/main/res/raw/questions.json). Każdy wpis ma następującą postać:
 
-## Odpowiedzi na pytania
+```json
+{
+  "q": "Treść pytania",
+  "a": "Odpowiedź A",
+  "b": "Odpowiedź B",
+  "c": "Odpowiedź C",
+  "d": "Odpowiedź D",
+  "correct_answer": "b"
+}
+```
 
-### 1. Dlaczego rejestracja wyniku znajduje się w polu klasy?
+Pole `correct_answer` wskazuje literę poprawnej odpowiedzi: `a`, `b`, `c` lub `d`.
 
-`ActivityResultLauncher` musi zostać zarejestrowany przed uruchomieniem aktywności. Dzięki temu Android może obsłużyć wynik również wtedy, gdy pierwsza aktywność zostanie zniszczona i ponownie utworzona. Gdyby rejestracja znajdowała się wewnątrz obsługi kliknięcia przycisku, mogłoby dojść do błędu związanego z cyklem życia aktywności.
+## Technologie
 
-### 2. Co zobaczy pierwszy ekran po naciśnięciu przycisku Wstecz?
-
-Po naciśnięciu Wstecz aplikacja zamyka drugi ekran i wraca do formularza. Wprowadzone wcześniej dane pozostają na swoich miejscach. Pierwsza aktywność otrzymuje `RESULT_CANCELED`, ponieważ użytkownik nie potwierdził zgłoszenia.
-
-## Wykorzystane technologie
-
-- Java
-- Android Studio
-- XML
-- Android SDK
-
-## Struktura projektu
-
-- `MainActivity.java` - obsługa formularza.
-- `SummaryActivity.java` - obsługa podsumowania i zwracania wyniku.
-- `activity_main.xml` - wygląd pierwszego ekranu.
-- `activity_summary.xml` - wygląd drugiego ekranu.
-- `strings.xml` - teksty używane w aplikacji.
-- `AndroidManifest.xml` - deklaracje aktywności.
-
-## Autor
-
-Projekt wykonany w ramach zajęć z aplikacji mobilnych.
+- Java 11
+- Android SDK (minSdk 24, targetSdk 37)
+- AndroidX AppCompat i Activity Result API
+- Material Components
+- XML dla interfejsu
+- JSON jako źródło pytań
